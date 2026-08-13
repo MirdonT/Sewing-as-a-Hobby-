@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Puzzle Parlor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #241623;
+    --panel: #2f1b2e;
+    --panel-light: #3c2440;
+    --gold: #e3b23c;
+    --gold-dim: #b58c2e;
+    --red: #c4432b;
+    --ivory: #f5e9d8;
+    --muted: #b79db2;
+    --teal: #4f9c8c;
+    --radius: 14px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 50% -10%, #3a2138 0%, var(--bg) 55%);
+    color: var(--ivory);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    padding: 32px 16px 64px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation: none !important; transition: none !important; }
+  }
+
+  .marquee{
+    max-width: 720px;
+    margin: 0 auto 28px;
+    text-align: center;
+    position: relative;
+  }
+
+  .marquee-frame{
+    border: 2px dashed var(--gold-dim);
+    border-radius: var(--radius);
+    padding: 22px 20px 18px;
+    position: relative;
+  }
+
+  .marquee-frame::before, .marquee-frame::after{
+    content: "";
+    position: absolute;
+    top: -3px; bottom: -3px;
+    width: 10px;
+    background:
+      radial-gradient(circle, var(--gold) 0 3px, transparent 3.5px) repeat-y;
+    background-size: 10px 16px;
+  }
+  .marquee-frame::before{ left: -5px; }
+  .marquee-frame::after{ right: -5px; }
+
+  .eyebrow{
+    font-size: 12px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin: 0 0 8px;
+  }
+
+  h1{
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-optical-sizing: auto;
+    font-size: clamp(32px, 6vw, 52px);
+    margin: 0 0 6px;
+    color: var(--gold);
+    text-shadow: 0 0 24px rgba(227,178,60,0.25);
+  }
+
+  .sub{
+    color: var(--muted);
+    font-size: 15px;
+    margin: 0;
+  }
+
+  nav.tabs{
+    max-width: 720px;
+    margin: 0 auto 22px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    background: var(--panel);
+    color: var(--muted);
+    border: 1px solid var(--panel-light);
+    border-radius: 999px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: all .18s ease;
+    letter-spacing: 0.02em;
+  }
+
+  .tab-btn:hover{ color: var(--ivory); border-color: var(--gold-dim); }
+
+  .tab-btn.active{
+    background: var(--gold);
+    color: #241623;
+    border-color: var(--gold);
+  }
+
+  .tab-btn:focus-visible, button:focus-visible, input:focus-visible{
+    outline: 3px solid var(--teal);
+    outline-offset: 2px;
+  }
+
+  main{
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .panel{
+    display: none;
+    background: var(--panel);
+    border-radius: var(--radius);
+    padding: 30px 26px 26px;
+    position: relative;
+    box-shadow: 0 20px 50px -20px rgba(0,0,0,0.6);
+    border: 1px solid var(--panel-light);
+  }
+  .panel.active{ display: block; animation: rise .35s ease; }
+
+  @keyframes rise{
+    from{ opacity: 0; transform: translateY(8px); }
+    to{ opacity: 1; transform: translateY(0); }
+  }
+
+  /* ticket stub notches */
+  .panel::before, .panel::after{
+    content:"";
+    position: absolute;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--bg);
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .panel::before{ left: -13px; }
+  .panel::after{ right: -13px; }
+
+  .stub-label{
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--gold);
+    margin: 0 0 4px;
+  }
+
+  .stub-desc{
+    color: var(--muted);
+    font-size: 14px;
+    margin: 0 0 22px;
+  }
+
+  .perforation{
+    border-top: 2px dashed var(--panel-light);
+    margin: 22px 0;
+  }
+
+  .card-display{
+    background: var(--panel-light);
+    border-radius: 10px;
+    padding: 24px 20px;
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    line-height: 1.5;
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--ivory);
+  }
+
+  .card-display.answer{
+    color: var(--teal);
+    font-size: 17px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+  }
+
+  .btn-row{
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+
+  button.action{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: transform .12s ease, filter .12s ease;
+  }
+
+  button.action:active{ transform: scale(0.97); }
+
+  .btn-primary{ background: var(--gold); color: #241623; }
+  .btn-primary:hover{ filter: brightness(1.08); }
+
+  .btn-ghost{ background: transparent; color: var(--ivory); border: 1px solid var(--panel-light) !important; border: 1px solid var(--muted); }
+  .btn-ghost:hover{ border-color: var(--gold-dim); color: var(--gold); }
+
+  .reveal-toggle{ display:none; }
+
+  /* Number guessing game */
+  .guess-row{
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  input[type="number"]{
+    flex: 1;
+    background: var(--panel-light);
+    border: 1px solid var(--muted);
+    color: var(--ivory);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+  }
+  input[type="number"]:focus{ border-color: var(--gold); }
+
+  .feedback{
+    margin-top: 16px;
+    min-height: 24px;
+    font-weight: 600;
+    text-align: center;
+    font-size: 15px;
+  }
+  .feedback.high{ color: var(--red); }
+  .feedback.low{ color: var(--teal); }
+  .feedback.win{ color: var(--gold); font-family: 'Fraunces', serif; font-size: 19px; }
+
+  .meta-row{
+    display:flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  .history{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .chip{
+    background: var(--panel-light);
+    border-radius: 6px;
+    padding: 4px 9px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .chip.high{ color: var(--red); }
+  .chip.low{ color: var(--teal); }
+
+  footer{
+    text-align:center;
+    margin-top: 34px;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  footer a{ color: var(--gold); text-decoration: none; }
+  footer a:hover{ text-decoration: underline; }
+</style>
+</head>
+<body>
+  <div class="common header">
+      <a href="../index.html" id="top">Home</a> |
+        <a href="../hobby.html">Hobby</a> |
+        <a href="../tableau.html">Tableau</a> | 
+        <a href="#">Games</a>
+        <br><br>
+  
+    </div>
+
+<div class="marquee">
+  <div class="marquee-frame">
+    <p class="eyebrow">Three Booths, One Ticket</p>
+    <h1>The Puzzle Parlor</h1>
+    <p class="sub">Step right up — riddles, groaners, and a number hiding somewhere between 1 and 100.</p>
+  </div>
+</div>
+
+<nav class="tabs" role="tablist" aria-label="Choose a booth">
+  <button class="tab-btn active" data-tab="riddle" role="tab" aria-selected="true">🔮 Riddles</button>
+  <button class="tab-btn" data-tab="joke" role="tab" aria-selected="false">🎪 Jokes</button>
+  <button class="tab-btn" data-tab="guess" role="tab" aria-selected="false">🎯 Guess the Number</button>
+</nav>
+
+<main>
+
+  <!-- RIDDLE PANEL -->
+  <section class="panel active" id="panel-riddle">
+    <p class="stub-label">Riddle Booth</p>
+    <p class="stub-desc">Read it slow. Answers are shy — you have to coax them out.</p>
+    <div class="card-display" id="riddle-text">Loading a riddle…</div>
+    <div class="card-display answer reveal-toggle" id="riddle-answer"></div>
+    <div class="btn-row">
+      <button class="action btn-primary" id="riddle-new">New riddle</button>
+      <button class="action btn-ghost" id="riddle-reveal">Reveal answer</button>
+    </div>
+  </section>
+
+  <!-- JOKE PANEL -->
+  <section class="panel" id="panel-joke">
+    <p class="stub-label">Joke Booth</p>
+    <p class="stub-desc">Groan-guaranteed. Tap the punchline when you're ready.</p>
+    <div class="card-display" id="joke-setup">Loading a joke…</div>
+    <div class="card-display answer reveal-toggle" id="joke-punchline"></div>
+    <div class="btn-row">
+      <button class="action btn-primary" id="joke-new">New joke</button>
+      <button class="action btn-ghost" id="joke-reveal">Reveal punchline</button>
+    </div>
+  </section>
+
+  <!-- NUMBER GUESSING PANEL -->
+  <section class="panel" id="panel-guess">
+    <p class="stub-label">Guessing Booth</p>
+    <p class="stub-desc">I'm thinking of a number between 1 and 100. Go on, take a shot.</p>
+    <div class="guess-row">
+      <input type="number" id="guess-input" min="1" max="100" placeholder="Your guess…" aria-label="Enter your guess">
+      <button class="action btn-primary" id="guess-submit">Guess</button>
+    </div>
+    <p class="feedback" id="guess-feedback"></p>
+    <div class="meta-row">
+      <span id="guess-count">Attempts: 0</span>
+      <button class="action btn-ghost" id="guess-reset" style="padding:6px 14px; font-size:12px;">Start over</button>
+    </div>
+    <div class="history" id="guess-history"></div>
+  </section>
+
+</main>
+
+<footer>a corner of the arcade &middot; <a href="index.html">back to the midway</a></footer>
+
+<script>
+  // ---------- Tab switching ----------
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.panel');
+
+  function activateTab(name){
+    tabBtns.forEach(b => {
+      const on = b.dataset.tab === name;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on);
+    });
+    panels.forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+  }
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      activateTab(btn.dataset.tab);
+      history.replaceState(null, '', '#' + btn.dataset.tab);
+    });
+  });
+
+  const initialHash = window.location.hash.replace('#', '');
+  if (['riddle','joke','guess'].includes(initialHash)) activateTab(initialHash);
+
+  // ---------- Riddle generator ----------
+  const riddles = [
+    { q: "The more you take, the more you leave behind. What am I?", a: "Footsteps" },
+    { q: "I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?", a: "An echo" },
+    { q: "What has to be broken before you can use it?", a: "An egg" },
+    { q: "I'm tall when I'm young, and short when I'm old. What am I?", a: "A candle" },
+    { q: "What has keys but no locks, space but no room, and you can enter but not go in?", a: "A keyboard" },
+    { q: "The person who makes it, sells it. The person who buys it never uses it. The person who uses it never knows they're using it. What is it?", a: "A coffin" },
+    { q: "What can travel around the world while staying in a corner?", a: "A stamp" },
+    { q: "I have branches, but no fruit, trunk, or leaves. What am I?", a: "A bank" },
+    { q: "What gets wetter the more it dries?", a: "A towel" },
+    { q: "What has a neck but no head?", a: "A bottle" },
+    { q: "What comes once in a minute, twice in a moment, but never in a thousand years?", a: "The letter M" },
+    { q: "What can you catch but not throw?", a: "A cold" }
+  ];
+  let currentRiddle = null;
+
+  function newRiddle(){
+    let next;
+    do { next = riddles[Math.floor(Math.random() * riddles.length)]; }
+    while (riddles.length > 1 && next === currentRiddle);
+    currentRiddle = next;
+    document.getElementById('riddle-text').textContent = currentRiddle.q;
+    const ansEl = document.getElementById('riddle-answer');
+    ansEl.textContent = 'Answer: ' + currentRiddle.a;
+    ansEl.classList.remove('reveal-toggle');
+    ansEl.style.display = 'none';
+    document.getElementById('riddle-reveal').textContent = 'Reveal answer';
+  }
+
+  document.getElementById('riddle-new').addEventListener('click', newRiddle);
+  document.getElementById('riddle-reveal').addEventListener('click', () => {
+    const ansEl = document.getElementById('riddle-answer');
+    const showing = ansEl.style.display === 'flex';
+    ansEl.style.display = showing ? 'none' : 'flex';
+    document.getElementById('riddle-reveal').textContent = showing ? 'Reveal answer' : 'Hide answer';
+  });
+
+  // ---------- Joke generator ----------
+  const jokes = [
+    { s: "Why don't scientists trust atoms?", p: "Because they make up everything." },
+    { s: "Why did the scarecrow win an award?", p: "He was outstanding in his field." },
+    { s: "What do you call a fish with no eyes?", p: "A fsh." },
+    { s: "Why don't skeletons fight each other?", p: "They don't have the guts." },
+    { s: "What do you call cheese that isn't yours?", p: "Nacho cheese." },
+    { s: "Why did the bicycle fall over?", p: "It was two-tired." },
+    { s: "What do you call a bear with no teeth?", p: "A gummy bear." },
+    { s: "Why can't you give Elsa a balloon?", p: "She'll let it go." },
+    { s: "What did the ocean say to the beach?", p: "Nothing, it just waved." },
+    { s: "Why did the coffee file a police report?", p: "It got mugged." },
+    { s: "How does a penguin build its house?", p: "Igloos it together." },
+    { s: "Why was the math book sad?", p: "It had too many problems." }
+  ];
+  let currentJoke = null;
+
+  function newJoke(){
+    let next;
+    do { next = jokes[Math.floor(Math.random() * jokes.length)]; }
+    while (jokes.length > 1 && next === currentJoke);
+    currentJoke = next;
+    document.getElementById('joke-setup').textContent = currentJoke.s;
+    const punchEl = document.getElementById('joke-punchline');
+    punchEl.textContent = currentJoke.p;
+    punchEl.style.display = 'none';
+    document.getElementById('joke-reveal').textContent = 'Reveal punchline';
+  }
+
+  document.getElementById('joke-new').addEventListener('click', newJoke);
+  document.getElementById('joke-reveal').addEventListener('click', () => {
+    const punchEl = document.getElementById('joke-punchline');
+    const showing = punchEl.style.display === 'flex';
+    punchEl.style.display = showing ? 'none' : 'flex';
+    document.getElementById('joke-reveal').textContent = showing ? 'Reveal punchline' : 'Hide punchline';
+  });
+
+  // ---------- Number guessing game ----------
+  let target = randomTarget();
+  let attempts = 0;
+  let pastGuesses = [];
+
+  function randomTarget(){ return Math.floor(Math.random() * 100) + 1; }
+
+  function resetGame(){
+    target = randomTarget();
+    attempts = 0;
+    pastGuesses = [];
+    document.getElementById('guess-count').textContent = 'Attempts: 0';
+    document.getElementById('guess-feedback').textContent = '';
+    document.getElementById('guess-feedback').className = 'feedback';
+    document.getElementById('guess-history').innerHTML = '';
+    document.getElementById('guess-input').value = '';
+    document.getElementById('guess-input').disabled = false;
+    document.getElementById('guess-submit').disabled = false;
+    document.getElementById('guess-input').focus();
+  }
+
+  function submitGuess(){
+    const input = document.getElementById('guess-input');
+    const val = parseInt(input.value, 10);
+    const feedback = document.getElementById('guess-feedback');
+
+    if (isNaN(val) || val < 1 || val > 100){
+      feedback.textContent = 'Enter a number between 1 and 100.';
+      feedback.className = 'feedback';
+      return;
+    }
+
+    attempts++;
+    document.getElementById('guess-count').textContent = 'Attempts: ' + attempts;
+
+    const chip = document.createElement('span');
+    chip.textContent = val;
+
+    if (val === target){
+      feedback.textContent = `🎉 That's it! The number was ${target}, found in ${attempts} guess${attempts === 1 ? '' : 'es'}.`;
+      feedback.className = 'feedback win';
+      chip.className = 'chip win';
+      input.disabled = true;
+      document.getElementById('guess-submit').disabled = true;
+    } else if (val < target){
+      feedback.textContent = 'Higher than that.';
+      feedback.className = 'feedback low';
+      chip.className = 'chip low';
+    } else {
+      feedback.textContent = 'Lower than that.';
+      feedback.className = 'feedback high';
+      chip.className = 'chip high';
+    }
+
+    document.getElementById('guess-history').appendChild(chip);
+    input.value = '';
+    input.focus();
+  }
+
+  document.getElementById('guess-submit').addEventListener('click', submitGuess);
+  document.getElementById('guess-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitGuess();
+  });
+  document.getElementById('guess-reset').addEventListener('click', resetGame);
+
+  // ---------- Init ----------
+  newRiddle();
+  newJoke();
+</script>
+
+</body>
+</html>
